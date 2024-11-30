@@ -76,6 +76,60 @@
     .delete-btn:hover {
       background-color: #e60000;
     }
+    li {
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  li:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Modal styles */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 500px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    position: relative;
+  }
+
+  .modal-content img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 18px;
+    cursor: pointer;
+    color: #333;
+  }
+
+  .close-btn:hover {
+    color: red;
+  }
   </style>
   <script>
     async function addUser() {
@@ -104,31 +158,67 @@
 
 
     async function listUsers() {
-        const response = await fetch("/list-users");
-         const users = await response.json();
+  const response = await fetch("/list-users");
+  const users = await response.json();
 
-        const userList = document.getElementById("user-list");
-         userList.innerHTML = "";
-         users.forEach((user, index) => {
-           const li = document.createElement("li");
+  const userList = document.getElementById("user-list");
+  userList.innerHTML = "";
 
-           const profilePic = user.profilePic
-           ? `<img src="${user.profilePic}" alt="Profile Picture" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;">`
-            : "";
+  users.forEach((user, index) => {
+    const li = document.createElement("li");
 
-          li.innerHTML = `${profilePic} Name: ${user.name}, Age: ${user.age}`;
+    const profilePic = user.profilePic
+      ? `<img src="${user.profilePic}" alt="Profile Picture" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;">`
+      : "";
 
-           const deleteBtn = document.createElement("button");
-          deleteBtn.textContent = "Delete";
-          deleteBtn.classList.add("delete-btn");
-          deleteBtn.onclick = async () => {
-            await deleteUser(index);
-          };
+    li.innerHTML = `${profilePic} Name: ${user.name}, Age: ${user.age}`;
 
-          li.appendChild(deleteBtn);
-           userList.appendChild(li);
-         });
+    // Add click event to open modal
+    li.onclick = () => showUserDetails(user);
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Delete";
+    deleteBtn.classList.add("delete-btn");
+    deleteBtn.onclick = async (e) => {
+      e.stopPropagation(); // Prevent modal opening when delete is clicked
+      await deleteUser(index);
+    };
+
+    li.appendChild(deleteBtn);
+    userList.appendChild(li);
+  });
+}
+
+function showUserDetails(user) {
+  const modal = document.getElementById("user-modal");
+  const modalBody = document.getElementById("modal-body");
+
+  const profilePic = user.profilePic
+    ? `<img src="${user.profilePic}" alt="Profile Picture">`
+    : `<img src="/default-profile.png" alt="Default Picture">`;
+
+  modalBody.innerHTML = `
+    ${profilePic}
+    <h2>${user.name}</h2>
+    <p>Age: ${user.age}</p>
+  `;
+
+  modal.style.display = "flex";
+
+  // Close modal on clicking the close button
+  const closeBtn = modal.querySelector(".close-btn");
+  closeBtn.onclick = () => {
+    modal.style.display = "none";
+  };
+
+  // Close modal on clicking outside the content
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      modal.style.display = "none";
     }
+  };
+}
+
 
 
     async function deleteUser(index) {
@@ -153,5 +243,13 @@
     <h2>Users</h2>
     <ul id="user-list"></ul>
   </div>
+  <!-- Modal for detailed user profile -->
+  <div id="user-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+  
 </body>
 </html>
