@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Manager</title>
+  <style>
+    /* General styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #4CAF50;
+    }
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    input:focus {
+      outline: none;
+      border-color: #4CAF50;
+      box-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      padding: 10px;
+      margin: 5px 0;
+      background: #f4f4f4;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .delete-btn {
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      font-size: 14px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .delete-btn:hover {
+      background-color: #e60000;
+    }
+  </style>
+  <script>
+    async function addUser() {
+      const name = document.getElementById("name").value;
+      const age = document.getElementById("age").value;
+
+      const response = await fetch("/add-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, age }),
+      });
+
+      const result = await response.json();
+      alert(result.message);
+      listUsers();
+      document.getElementById("name").value = "";
+      document.getElementById("age").value = "";
+    }
+
+    async function listUsers() {
+      const response = await fetch("/list-users");
+      const users = await response.json();
+
+      const userList = document.getElementById("user-list");
+      userList.innerHTML = "";
+      users.forEach((user, index) => {
+        const li = document.createElement("li");
+        li.textContent = `Name: ${user.name}, Age: ${user.age}`;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.classList.add("delete-btn");
+        deleteBtn.onclick = async () => {
+          await deleteUser(index);
+        };
+
+        li.appendChild(deleteBtn);
+        userList.appendChild(li);
+      });
+    }
+
+    async function deleteUser(index) {
+      const response = await fetch(`/delete-user?index=${index}`, { method: "DELETE" });
+      const result = await response.json();
+      alert(result.message);
+      listUsers();
+    }
+
+    document.addEventListener("DOMContentLoaded", listUsers);
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>User Manager</h1>
+    <form onsubmit="addUser(); return false;">
+      <input id="name" type="text" placeholder="Name" required />
+      <input id="age" type="number" placeholder="Age" required />
+      <button type="submit">Add User</button>
+    </form>
+    <h2>Users</h2>
+    <ul id="user-list"></ul>
+  </div>
+</body>
+</html>
