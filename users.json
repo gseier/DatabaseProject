@@ -1,26 +1,7 @@
 [
   {
-    "name": "Gustav",
-    "age": "28"
-  },
-  {
-    "name": "War",
-    "age": "127"
-  },
-  {
-    "name": "August",
-    "age": "18"
-  },
-  {
-    "name": "Paris",
-    "age": "17"
-  },
-  {
-    "name": "Aske",
-    "age": "18"
-  },
-  {
-    "name": "Pernille",
-    "age": "24"
+    "name": "Test",
+    "age": "23",
+    "profilePic": "/uploads/1732977110356-example.png"
   }
 ]

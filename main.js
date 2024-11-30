@@ -50,16 +50,26 @@ Deno.serve(async (req) => {
 
   // Add user (POST request)
   if (req.method === "POST" && pathname === "/add-user") {
-    const body = await req.json();
-    users.push(body);
-
-    // Save the updated user list to the file
+    const formData = await req.formData();
+    const name = formData.get("name");
+    const age = formData.get("age");
+    const profilePic = formData.get("profilePic");
+  
+    let profilePicPath = "";
+    if (profilePic) {
+      const fileName = `${Date.now()}-${profilePic.name}`;
+      profilePicPath = `/uploads/${fileName}`;
+      await Deno.writeFile(`./public${profilePicPath}`, new Uint8Array(await profilePic.arrayBuffer()));
+    }
+  
+    users.push({ name, age, profilePic: profilePicPath });
     await saveUsers(users);
-
-    return new Response(JSON.stringify({ message: "User added", users }), {
+  
+    return new Response(JSON.stringify({ message: "User added" }), {
       headers: { "Content-Type": "application/json" },
     });
   }
+  
 
   // List users (GET request)
   if (pathname === "/list-users") {

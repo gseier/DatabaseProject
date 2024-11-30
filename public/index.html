@@ -79,43 +79,57 @@
   </style>
   <script>
     async function addUser() {
-      const name = document.getElementById("name").value;
-      const age = document.getElementById("age").value;
+     const name = document.getElementById("name").value;
+     const age = document.getElementById("age").value;
+     const profilePicInput = document.getElementById("profilePic");
+     const profilePic = profilePicInput.files[0];
 
-      const response = await fetch("/add-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, age }),
-      });
+     const formData = new FormData();
+     formData.append("name", name);
+     formData.append("age", age);
+     if (profilePic) formData.append("profilePic", profilePic);
 
-      const result = await response.json();
-      alert(result.message);
-      listUsers();
-      document.getElementById("name").value = "";
-      document.getElementById("age").value = "";
+     const response = await fetch("/add-user", {
+      method: "POST",
+      body: formData,
+     });
+
+    const result = await response.json();
+     alert(result.message);
+     listUsers();
+     document.getElementById("name").value = "";
+     document.getElementById("age").value = "";
+     profilePicInput.value = "";
     }
+
 
     async function listUsers() {
-      const response = await fetch("/list-users");
-      const users = await response.json();
+        const response = await fetch("/list-users");
+         const users = await response.json();
 
-      const userList = document.getElementById("user-list");
-      userList.innerHTML = "";
-      users.forEach((user, index) => {
-        const li = document.createElement("li");
-        li.textContent = `Name: ${user.name}, Age: ${user.age}`;
+        const userList = document.getElementById("user-list");
+         userList.innerHTML = "";
+         users.forEach((user, index) => {
+           const li = document.createElement("li");
 
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Delete";
-        deleteBtn.classList.add("delete-btn");
-        deleteBtn.onclick = async () => {
-          await deleteUser(index);
-        };
+           const profilePic = user.profilePic
+           ? `<img src="${user.profilePic}" alt="Profile Picture" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;">`
+            : "";
 
-        li.appendChild(deleteBtn);
-        userList.appendChild(li);
-      });
+          li.innerHTML = `${profilePic} Name: ${user.name}, Age: ${user.age}`;
+
+           const deleteBtn = document.createElement("button");
+          deleteBtn.textContent = "Delete";
+          deleteBtn.classList.add("delete-btn");
+          deleteBtn.onclick = async () => {
+            await deleteUser(index);
+          };
+
+          li.appendChild(deleteBtn);
+           userList.appendChild(li);
+         });
     }
+
 
     async function deleteUser(index) {
       const response = await fetch(`/delete-user?index=${index}`, { method: "DELETE" });
@@ -130,9 +144,10 @@
 <body>
   <div class="container">
     <h1>User Manager</h1>
-    <form onsubmit="addUser(); return false;">
+    <form onsubmit="addUser(); return false;" enctype="multipart/form-data">
       <input id="name" type="text" placeholder="Name" required />
       <input id="age" type="number" placeholder="Age" required />
+      <input id="profilePic" type="file" accept="image/*" />
       <button type="submit">Add User</button>
     </form>
     <h2>Users</h2>
