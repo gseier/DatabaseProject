@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Manager</title>
   <style>
-    /* General styles */
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -73,9 +73,12 @@
       border-radius: 5px;
       cursor: pointer;
     }
+    
     .delete-btn:hover {
       background-color: #e60000;
     }
+
+    
     li {
     position: relative;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -86,7 +89,6 @@
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
   }
 
-  /* Modal styles */
   .modal {
     position: fixed;
     top: 0;
@@ -173,18 +175,25 @@
 
     li.innerHTML = `${profilePic} Name: ${user.name}, Age: ${user.age}`;
 
-    // Add click event to open modal
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Edit";
+    editBtn.onclick = (e) => {
+      e.stopPropagation();
+      editUser(index, user.name, user.age);
+    }
+
     li.onclick = () => showUserDetails(user);
 
     const deleteBtn = document.createElement("button");
     deleteBtn.textContent = "Delete";
     deleteBtn.classList.add("delete-btn");
     deleteBtn.onclick = async (e) => {
-      e.stopPropagation(); // Prevent modal opening when delete is clicked
+      e.stopPropagation();
       await deleteUser(index);
     };
 
     li.appendChild(deleteBtn);
+    li.appendChild(editBtn);
     userList.appendChild(li);
   });
 }
@@ -211,7 +220,6 @@ function showUserDetails(user) {
     modal.style.display = "none";
   };
 
-  // Close modal on clicking outside the content
   modal.onclick = (e) => {
     if (e.target === modal) {
       modal.style.display = "none";
@@ -227,6 +235,23 @@ function showUserDetails(user) {
       alert(result.message);
       listUsers();
     }
+    async function editUser(index, currentName, currentAge) {
+      const newName = prompt("Edit Name:", currentName);
+      const newAge = prompt("Edit Age:", currentAge);
+
+      if (newName && newAge) {
+        const response = await fetch(`/edit-user?index=${index}`, {
+          method: "PUT",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({ name: newName, age: newAge }),
+        });
+
+       const result = await response.json();
+       alert(result.message);
+       listUsers();
+     }
+    }
+    
 
     document.addEventListener("DOMContentLoaded", listUsers);
   </script>
@@ -243,7 +268,6 @@ function showUserDetails(user) {
     <h2>Users</h2>
     <ul id="user-list"></ul>
   </div>
-  <!-- Modal for detailed user profile -->
   <div id="user-modal" class="modal" style="display: none;">
     <div class="modal-content">
       <span class="close-btn">&times;</span>
